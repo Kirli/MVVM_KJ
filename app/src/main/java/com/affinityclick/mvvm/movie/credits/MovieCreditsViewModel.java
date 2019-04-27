@@ -25,7 +25,7 @@ public class MovieCreditsViewModel extends ViewModel {
     return getCreditsLiveData;
   }
 
-  public void getMovieCredits(@NonNull int page) {
-    getCreditsTrigger.setValue(page);
+  public void getMovieCredits(@NonNull int movieId) {
+    getCreditsTrigger.setValue(movieId);
   }
 }
