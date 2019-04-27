@@ -1,5 +1,6 @@
 package com.affinityclick.mvvm.network;
 
+import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
 import retrofit2.Call;
@@ -17,4 +18,7 @@ public interface TMDBApi {
 
   @GET("movie/{id}")
   Call<Movie> getMovie(@Path("id") Integer id, @Query("api_key") String userkey);
+
+  @GET("movie/{id}/credits")
+  Call<Credits> getCredits(@Path("id") Integer id, @Query("api_key") String userkey);
 }

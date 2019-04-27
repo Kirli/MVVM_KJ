@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.affinityclick.mvvm.BuildConfig;
+import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
 import com.affinityclick.mvvm.util.AppExecutors;
@@ -111,6 +112,62 @@ public class TMDBRepository {
     if (fetchResource != null) {
       fetchResource.postValue(errorValue);
     }
+    return errorValue;
+  }
+
+  /**
+   * Gets the credits for a movie.
+   *
+   * @param id Movie id to lookup.
+   * @return A live data to be observed on for the results of the call to get the credits.
+   */
+  public LiveData<FetchResource<Credits>> getCredits(Integer id) {
+    FetchResource<Credits> getCredits = new FetchResource<>();
+    MutableLiveData<FetchResource<Credits>> creditsLiveResource = new MutableLiveData<>();
+
+    creditsLiveResource.postValue(getCredits);
+    appExecutors.networkIO().execute(() -> fetchCredits(creditsLiveResource, id));
+
+    return creditsLiveResource;
+  }
+
+  /**
+   * Network call to get the credits for a movie.
+   *
+   * @param fetchResource LiveData to post the results to.
+   * @param id Movie id to lookup.
+   * @return The value it emits through the LiveData (possibly useful for testing).
+   */
+  private FetchResource<Credits> fetchCredits(@Nullable MutableLiveData<FetchResource<Credits>> fetchResource, Integer id) {
+    if (fetchResource != null) {
+      fetchResource.postValue(FetchResource.loading());
+    }
+
+    Call<Credits> castCall = tmdbApi.getCredits(id, BuildConfig.TMDB_API_KEY);
+
+    try {
+      Response<Credits> getCreditsResponse = castCall.execute();
+
+      if (getCreditsResponse.isSuccessful()) {
+        Credits creditsPageResult = getCreditsResponse.body();
+        FetchResource<Credits> success = FetchResource.success(creditsPageResult);
+
+        if (fetchResource != null) {
+          fetchResource.postValue(success);
+        }
+
+        return success;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    // Failed to return success, so we return an error.
+    FetchResource<Credits> errorValue = FetchResource.error(null);
+    if (fetchResource != null) {
+      fetchResource.postValue(errorValue);
+    }
+
     return errorValue;
   }
 }
