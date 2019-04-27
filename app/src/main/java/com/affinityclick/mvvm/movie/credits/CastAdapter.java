@@ -1,4 +1,4 @@
-package com.affinityclick.mvvm.movie.list;
+package com.affinityclick.mvvm.movie.credits;
 
 import android.view.LayoutInflater;
 import android.view.View;

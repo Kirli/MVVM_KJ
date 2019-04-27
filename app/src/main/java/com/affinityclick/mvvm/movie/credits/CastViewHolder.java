@@ -1,4 +1,4 @@
-package com.affinityclick.mvvm.movie.list;
+package com.affinityclick.mvvm.movie.credits;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -32,12 +32,24 @@ public class CastViewHolder extends RecyclerView.ViewHolder {
   }
 
   public void bind(final Cast cast) {
-    Glide
-      .with(itemView)
-      .load(R.drawable.ic_profile_photo)
-      .centerCrop()
-      .apply(RequestOptions.placeholderOf(R.color.colorLoading))
-      .into(castPhoto);
+    // Check if we have a profile picture.
+    if (cast.getProfilePath() != null) {
+      String imagePath = CreditsUtil.photoPathBuilder((String) cast.getProfilePath());
+
+      Glide
+              .with(itemView)
+              .load(imagePath)
+              .centerCrop()
+              .apply(RequestOptions.placeholderOf(R.color.colorLoading))
+              .into(castPhoto);
+    } else {
+      Glide
+              .with(itemView)
+              .load(R.drawable.ic_profile_photo)
+              .centerCrop()
+              .apply(RequestOptions.placeholderOf(R.color.colorLoading))
+              .into(castPhoto);
+    }
 
     castName.setText(cast.getName());
     characterName.setText(cast.getCharacter());

@@ -20,8 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.affinityclick.mvvm.R;
-import com.affinityclick.mvvm.movie.list.CastAdapter;
-import com.affinityclick.mvvm.movie.list.CrewAdapter;
 
 import javax.inject.Inject;
 

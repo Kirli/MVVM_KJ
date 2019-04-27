@@ -1,7 +1,6 @@
 package com.affinityclick.mvvm.util;
 
 public class MovieUtil {
-
   /**
    *
    * @param imagePath A relative image path.
