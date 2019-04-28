@@ -7,6 +7,7 @@ import com.affinityclick.mvvm.BuildConfig;
 import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
+import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.AppExecutors;
 import java.io.IOException;
 import javax.inject.Inject;
@@ -175,6 +176,62 @@ public class TMDBRepository {
 
     // Failed to return success, so we return an error.
     FetchResource<Credits> errorValue = FetchResource.error(null);
+    if (fetchResource != null) {
+      fetchResource.postValue(errorValue);
+    }
+
+    return errorValue;
+  }
+
+  /**
+   * Gets the videos for a movie.
+   *
+   * @param id Movie id to lookup.
+   * @return A live data to be observed on for the results of the call to get the videos.
+   */
+  public LiveData<FetchResource<Videos>> getVideos(Integer id) {
+    FetchResource<Videos> getVideos = new FetchResource<>();
+    MutableLiveData<FetchResource<Videos>> videosLiveResource = new MutableLiveData<>();
+
+    videosLiveResource.postValue(getVideos);
+    appExecutors.networkIO().execute(() -> fetchVideos(videosLiveResource, id));
+
+    return videosLiveResource;
+  }
+
+  /**
+   * Network call to get the videos for a movie.
+   *
+   * @param fetchResource LiveData to post the results to.
+   * @param id Movie id to lookup.
+   * @return The value it emits through the LiveData (possibly useful for testing).
+   */
+  private FetchResource<Videos> fetchVideos(@Nullable MutableLiveData<FetchResource<Videos>> fetchResource, Integer id) {
+    if (fetchResource != null) {
+      fetchResource.postValue(FetchResource.loading());
+    }
+
+    Call<Videos> videoCall = tmdbApi.getVideos(id, BuildConfig.TMDB_API_KEY);
+
+    try {
+      Response<Videos> getVideosResponse = videoCall.execute();
+
+      if (getVideosResponse.isSuccessful()) {
+        Videos videosPageResult = getVideosResponse.body();
+        FetchResource<Videos> success = FetchResource.success(videosPageResult);
+
+        if (fetchResource != null) {
+          fetchResource.postValue(success);
+        }
+
+        return success;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    // Failed to return success, so we return an error.
+    FetchResource<Videos> errorValue = FetchResource.error(null);
     if (fetchResource != null) {
       fetchResource.postValue(errorValue);
     }

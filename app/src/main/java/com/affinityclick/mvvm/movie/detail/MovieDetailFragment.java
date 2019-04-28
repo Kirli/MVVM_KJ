@@ -111,24 +111,33 @@ public class MovieDetailFragment extends Fragment {
   private void refreshUI() {
     if (movie != null) {
       movieTitle.setText(movie.getTitle());
+
       movieOverviewLabel.setVisibility(View.VISIBLE);
       movieOverview.setText(movie.getOverview());
+
       movieRating.setVisibility(View.VISIBLE);
       movieRating.setRating((float) (movie.getVoteAverage() / 2));
+
       if (movie.getGenres() != null) {
         List<String> currentGenres = new ArrayList<>();
+
         for (Genre genre : movie.getGenres()) {
           currentGenres.add(genre.getName());
         }
+
         movieGenres.setText(TextUtils.join(", ", currentGenres));
       }
+
       movieReleaseDate.setText(movie.getReleaseDate());
+
       Glide.with(movieBackdrop)
           .load(MovieUtil.imagePathBuilder(movie.getBackdropPath()))
           .apply(RequestOptions.placeholderOf(R.color.colorLoading))
           .into(movieBackdrop);
 
       //TODO: Trailers
+      //movieTrailers.
+
       //TODO: Reviews
     }
   }
