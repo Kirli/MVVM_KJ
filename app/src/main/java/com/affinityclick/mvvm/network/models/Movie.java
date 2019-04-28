@@ -31,7 +31,7 @@ public class Movie implements Parcelable {
   @SerializedName("status") @Expose private String status;
   @SerializedName("tagline") @Expose private String tagline;
   @SerializedName("title") @Expose private String title;
-  @SerializedName("video") @Expose private Boolean video;
+  @SerializedName("webvideo") @Expose private Boolean video;
   @SerializedName("vote_average") @Expose private Double voteAverage;
   @SerializedName("vote_count") @Expose private Integer voteCount;
 

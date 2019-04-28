@@ -1,16 +1,24 @@
 package com.affinityclick.mvvm.movie.detail;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -24,7 +32,10 @@ import butterknife.Unbinder;
 import com.affinityclick.mvvm.R;
 import com.affinityclick.mvvm.network.models.Genre;
 import com.affinityclick.mvvm.network.models.Movie;
+import com.affinityclick.mvvm.network.models.Video;
+import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.MovieUtil;
+import com.affinityclick.mvvm.util.VideoUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import dagger.android.support.AndroidSupportInjection;
@@ -41,14 +52,21 @@ public class MovieDetailFragment extends Fragment {
   @BindView(R.id.summaryLabel) TextView movieOverviewLabel;
   @BindView(R.id.movieDetailsReleaseDate) TextView movieReleaseDate;
   @BindView(R.id.movieDetailsRating) RatingBar movieRating;
+  @BindView(R.id.trailersLabel) TextView trailersLabel;
   @BindView(R.id.movieTrailers) LinearLayout movieTrailers;
   @BindView(R.id.movieReviews) LinearLayout movieReviews;
+
   @Inject ViewModelProvider.Factory viewModelFactory;
 
   private Unbinder unbinder;
   private MovieDetailViewModel viewModel;
   private Integer movieId;
   private Movie movie;
+  private Videos videos;
+
+  // Track the trailers
+  private ArrayList<VideoWebPlayer> webViewList;
+  private boolean firstLoad = true;
 
   public static MovieDetailFragment newInstance() {
     return new MovieDetailFragment();
@@ -89,14 +107,41 @@ public class MovieDetailFragment extends Fragment {
         default:
       }
     });
+
+    webViewList = new ArrayList<>();
+
+    viewModel.getMovieVideos(movieId);
+
+    viewModel.getMovieVideosLiveData().observe(this, movieFetchResource -> {
+      switch (movieFetchResource.getState()) {
+        case ERROR:
+          Toast.makeText(getContext(), R.string.generic_error, Toast.LENGTH_LONG).show();
+          break;
+        case LOADING:
+          break;
+        case SUCCESS:
+          videos = movieFetchResource.getData();
+          refreshVideoUI();
+          break;
+        case UNINITIALIZED:
+          break;
+        default:
+      }
+    });
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.movie_detail_fragment, container, false);
+
     unbinder = ButterKnife.bind(this, view);
+
+    firstLoad = true;
+
     refreshUI();
+    refreshVideoUI();
+
     return view;
   }
 
@@ -135,10 +180,28 @@ public class MovieDetailFragment extends Fragment {
           .apply(RequestOptions.placeholderOf(R.color.colorLoading))
           .into(movieBackdrop);
 
-      //TODO: Trailers
-      //movieTrailers.
-
       //TODO: Reviews
+    }
+  }
+
+  private void refreshVideoUI() {
+    if (videos == null) {
+      return;
+    }
+
+    if (firstLoad) {
+      for (Video video : videos.getVideos()) {
+        if (video.getType().equals("Trailer")) {
+          trailersLabel.setVisibility(View.VISIBLE);
+          webViewList.add(new VideoWebPlayer(movieTrailers, video.getKey()));
+        }
+      }
+
+      firstLoad = false;
+    }
+
+    for (VideoWebPlayer player : webViewList) {
+      player.launch();
     }
   }
 
