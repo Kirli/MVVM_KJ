@@ -11,17 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
-
   private final MovieClickListener movieClickListener;
   private final List<Movie> movieList;
+
+  // Track pages loaded.
+  private int firstPage = 1;
+  private int lastPage = 1;
 
   public MovieAdapter(MovieClickListener movieClickListener) {
     movieList = new ArrayList<>();
     this.movieClickListener = movieClickListener;
   }
 
+  public int getLastPage() {
+    return lastPage;
+  }
+
+  public int getNextPage() {
+    lastPage++;
+
+    return lastPage;
+  }
+
   public synchronized void updateMovieList(@NonNull List<Movie> movies) {
-    movieList.clear();
+    //movieList.clear();
     movieList.addAll(movies);
     notifyDataSetChanged();
   }

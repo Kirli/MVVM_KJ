@@ -22,43 +22,59 @@ import dagger.android.support.AndroidSupportInjection;
 import javax.inject.Inject;
 
 public class MovieTopRatedListFragment extends Fragment {
+  @Inject
+  ViewModelProvider.Factory viewModelFactory;
 
-  @Inject ViewModelProvider.Factory viewModelFactory;
   private MovieTopRatedListViewModel viewModel;
+
   private MovieAdapter movieAdapter;
-  @BindView(R.id.rv_movies) RecyclerView recyclerView;
+
+  @BindView(R.id.rv_movies)
+  RecyclerView recyclerView;
+
   private Unbinder unbinder;
 
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
+
     AndroidSupportInjection.inject(this);
-    movieAdapter = new MovieAdapter(movie -> {
-      MovieTopRatedListFragmentDirections.ViewMovieDetail
-          action = MovieTopRatedListFragmentDirections.viewMovieDetail(movie);
-      NavHostFragment.findNavController(this).navigate(action);
-    });
+
+    movieAdapter = new MovieAdapter(
+      movie -> {
+        MovieTopRatedListFragmentDirections.ViewMovieDetail
+        action = MovieTopRatedListFragmentDirections.viewMovieDetail(movie);
+
+        NavHostFragment.findNavController(this).navigate(action); }
+    );
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     viewModel = ViewModelProviders.of(this, viewModelFactory).get(MovieTopRatedListViewModel.class);
+
     viewModel.getMovieListLiveData().observe(this, movieFetchResource -> {
       switch (movieFetchResource.getState()) {
         case ERROR:
           break;
+
         case LOADING:
           break;
+
         case SUCCESS:
           movieAdapter.updateMovieList(movieFetchResource.getData().getResults());
           break;
+
         case UNINITIALIZED:
           break;
+
         default:
       }
     });
-    viewModel.getMovieList(1);
+
+    viewModel.getMovieList(movieAdapter.getLastPage());
     //TODO: Make this an infinite scrollView
   }
 
@@ -71,6 +87,19 @@ public class MovieTopRatedListFragment extends Fragment {
 
     recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     recyclerView.setAdapter(movieAdapter);
+
+    // attach a listener to trigger a page load when we can no longer scroll vertically.
+    recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+      @Override
+      public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+        super.onScrolled(recyclerView, dx, dy);
+
+        if (!recyclerView.canScrollVertically(1)) {
+          viewModel.getMovieList(movieAdapter.getNextPage());
+        }
+      }
+    });
+
     return view;
   }
 

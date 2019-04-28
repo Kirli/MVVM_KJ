@@ -33,8 +33,11 @@ public class TMDBRepository {
   public LiveData<FetchResource<PageResult<Movie>>> getTopRatedMovies(int page) {
     FetchResource<PageResult<Movie>> getMovies = new FetchResource<>();
     MutableLiveData<FetchResource<PageResult<Movie>>> moviesListLiveResource = new MutableLiveData<>();
+
     moviesListLiveResource.setValue(getMovies);
+
     appExecutors.networkIO().execute(() -> fetchTopRatedMovieList(moviesListLiveResource, page));
+
     return moviesListLiveResource;
   }
 
@@ -49,24 +52,32 @@ public class TMDBRepository {
     if (fetchResource != null) {
       fetchResource.postValue(FetchResource.loading());
     }
+
     Call<PageResult<Movie>> moviePageCall = tmdbApi.getTopRatedMovies(page, BuildConfig.TMDB_API_KEY);
+
     try {
       Response<PageResult<Movie>> getMoviesResponse = moviePageCall.execute();
+
       if (getMoviesResponse.isSuccessful()) {
         PageResult<Movie> moviePageResult = getMoviesResponse.body();
         FetchResource<PageResult<Movie>> success = FetchResource.success(moviePageResult);
+
         if (fetchResource != null) {
           fetchResource.postValue(success);
         }
+
         return success;
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
+
     FetchResource<PageResult<Movie>> errorValue = FetchResource.error(null);
+
     if (fetchResource != null) {
       fetchResource.postValue(errorValue);
     }
+
     return errorValue;
   }
 
