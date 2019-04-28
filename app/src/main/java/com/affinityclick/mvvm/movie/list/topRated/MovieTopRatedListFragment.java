@@ -64,7 +64,7 @@ public class MovieTopRatedListFragment extends Fragment {
           break;
 
         case SUCCESS:
-          movieAdapter.updateMovieList(movieFetchResource.getData().getResults());
+          movieAdapter.updateMovieList(movieFetchResource.getData());
           break;
 
         case UNINITIALIZED:
@@ -74,7 +74,7 @@ public class MovieTopRatedListFragment extends Fragment {
       }
     });
 
-    viewModel.getMovieList(movieAdapter.getLastPage());
+    viewModel.getMovieList(movieAdapter.getNextPage());
     //TODO: Make this an infinite scrollView
   }
 
@@ -95,7 +95,13 @@ public class MovieTopRatedListFragment extends Fragment {
         super.onScrolled(recyclerView, dx, dy);
 
         if (!recyclerView.canScrollVertically(1)) {
-          viewModel.getMovieList(movieAdapter.getNextPage());
+          if (movieAdapter.getNextPage() != -1) {
+            viewModel.getMovieList(movieAdapter.getNextPage());
+          }
+        } else if (!recyclerView.canScrollVertically(-1)) {
+          if (movieAdapter.getPreviousPage() != -1) {
+            viewModel.getMovieList(movieAdapter.getPreviousPage());
+          }
         }
       }
     });
