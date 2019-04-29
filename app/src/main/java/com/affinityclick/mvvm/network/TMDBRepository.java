@@ -8,6 +8,7 @@ import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
 import com.affinityclick.mvvm.network.models.Review;
+import com.affinityclick.mvvm.network.models.ReviewFilter;
 import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.AppExecutors;
 import java.io.IOException;
@@ -241,16 +242,16 @@ public class TMDBRepository {
   }
 
   /**
-   * @param page Page of reviews for a movie to show.
+   * @param filter Filter that contains parameters for page number and movie id.
    * @return Value to be observed on to return the result
    */
-  public LiveData<FetchResource<PageResult<Review>>> getReviews(int movieId, int page) {
+  public LiveData<FetchResource<PageResult<Review>>> getReviews(ReviewFilter filter) {
     FetchResource<PageResult<Review>> getReviews = new FetchResource<>();
     MutableLiveData<FetchResource<PageResult<Review>>> reviewsListLiveResource = new MutableLiveData<>();
 
     reviewsListLiveResource.postValue(getReviews);
 
-    appExecutors.networkIO().execute(() -> fetchReviewsList(reviewsListLiveResource, movieId, page));
+    appExecutors.networkIO().execute(() -> fetchReviewsList(reviewsListLiveResource, filter));
 
     return reviewsListLiveResource;
   }
@@ -259,16 +260,16 @@ public class TMDBRepository {
    * Network call to get the reviews for a movie.
    *
    * @param fetchResource LiveData to post the results to
-   * @param page Results page
+   * @param filter Filter that contains parameters for page number and movie id.
    * @return the value it emits through the LiveData (possibly useful for testing)
    */
   private FetchResource<PageResult<Review>> fetchReviewsList(@Nullable MutableLiveData<FetchResource<PageResult<Review>>> fetchResource,
-                                                             int movieId, int page) {
+                                                             ReviewFilter filter) {
     if (fetchResource != null) {
       fetchResource.postValue(FetchResource.loading());
     }
 
-    Call<PageResult<Review>> reviewsPageCall = tmdbApi.getReviews(movieId, page, BuildConfig.TMDB_API_KEY);
+    Call<PageResult<Review>> reviewsPageCall = tmdbApi.getReviews(filter.movieId, filter.page, BuildConfig.TMDB_API_KEY);
 
     try {
       Response<PageResult<Review>> getReviewsResponse = reviewsPageCall.execute();

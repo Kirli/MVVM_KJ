@@ -8,6 +8,9 @@ import androidx.lifecycle.ViewModel;
 import com.affinityclick.mvvm.network.FetchResource;
 import com.affinityclick.mvvm.network.TMDBRepository;
 import com.affinityclick.mvvm.network.models.Movie;
+import com.affinityclick.mvvm.network.models.PageResult;
+import com.affinityclick.mvvm.network.models.Review;
+import com.affinityclick.mvvm.network.models.ReviewFilter;
 import com.affinityclick.mvvm.network.models.Videos;
 
 import javax.inject.Inject;
@@ -22,10 +25,14 @@ public class MovieDetailViewModel extends ViewModel {
   private final MutableLiveData<Integer> getMovieVideosTrigger = new MutableLiveData<>();
   private final LiveData<FetchResource<Videos>> getMovieVideosLiveData;
 
+  private final MutableLiveData<ReviewFilter> getMovieReviewsTrigger = new MutableLiveData<>();
+  private final LiveData<FetchResource<PageResult<Review>>> getMovieReviewsLiveData;
+
   @Inject
   public MovieDetailViewModel(TMDBRepository tmdbRepository) {
     getMovieLiveData = Transformations.switchMap(getMovieTrigger, tmdbRepository::getMovie);
     getMovieVideosLiveData = Transformations.switchMap(getMovieVideosTrigger, tmdbRepository::getVideos);
+    getMovieReviewsLiveData = Transformations.switchMap(getMovieReviewsTrigger, tmdbRepository::getReviews);
   }
 
   // Movie Details
@@ -44,5 +51,14 @@ public class MovieDetailViewModel extends ViewModel {
 
   public void getMovieVideos(@NonNull Integer id) {
     getMovieVideosTrigger.setValue(id);
+  }
+
+  // Movie Reviews
+  public LiveData<FetchResource<PageResult<Review>>> getMovieReviewsLiveData() {
+    return getMovieReviewsLiveData;
+  }
+
+  public void getMovieReviews(@NonNull ReviewFilter filter) {
+    getMovieReviewsTrigger.setValue(filter);
   }
 }

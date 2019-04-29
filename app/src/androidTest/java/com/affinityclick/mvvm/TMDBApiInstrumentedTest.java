@@ -11,6 +11,7 @@ import com.affinityclick.mvvm.network.TMDBRepository_Factory;
 import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.PageResult;
 import com.affinityclick.mvvm.network.models.Review;
+import com.affinityclick.mvvm.network.models.ReviewFilter;
 import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.AppExecutors;
 import com.affinityclick.mvvm.util.AppExecutors_Factory;
@@ -129,7 +130,7 @@ public class TMDBApiInstrumentedTest {
     TMDBApi api = AppModule_ProvideTMDBApiFactory.create(new AppModule()).get();
     TMDBRepository repo = TMDBRepository_Factory.newTMDBRepository(appExecutors, api);
 
-    LiveData<FetchResource<PageResult<Review>>> reviews = repo.getReviews(movieId, 1);
+    LiveData<FetchResource<PageResult<Review>>> reviews = repo.getReviews(new ReviewFilter(movieId, 1));
 
     FetchResource<PageResult<Review>> res = reviews.getValue();
     assert res != null;

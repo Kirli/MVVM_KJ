@@ -25,6 +25,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -32,6 +34,7 @@ import butterknife.Unbinder;
 import com.affinityclick.mvvm.R;
 import com.affinityclick.mvvm.network.models.Genre;
 import com.affinityclick.mvvm.network.models.Movie;
+import com.affinityclick.mvvm.network.models.ReviewFilter;
 import com.affinityclick.mvvm.network.models.Video;
 import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.MovieUtil;
@@ -54,7 +57,8 @@ public class MovieDetailFragment extends Fragment {
   @BindView(R.id.movieDetailsRating) RatingBar movieRating;
   @BindView(R.id.trailersLabel) TextView trailersLabel;
   @BindView(R.id.movieTrailers) LinearLayout movieTrailers;
-  @BindView(R.id.movieReviews) LinearLayout movieReviews;
+  @BindView(R.id.reviewsLabel) TextView reviewsLabel;
+  @BindView(R.id.rv_reviews) RecyclerView reviewsList;
 
   @Inject ViewModelProvider.Factory viewModelFactory;
 
@@ -63,6 +67,7 @@ public class MovieDetailFragment extends Fragment {
   private Integer movieId;
   private Movie movie;
   private Videos videos;
+  private ReviewAdapter reviewAdapter;
 
   // Track the trailers
   private ArrayList<VideoWebPlayer> webViewList;
@@ -75,7 +80,10 @@ public class MovieDetailFragment extends Fragment {
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
+
     AndroidSupportInjection.inject(this);
+
+    reviewAdapter = new ReviewAdapter();
   }
 
   @Override
@@ -108,6 +116,7 @@ public class MovieDetailFragment extends Fragment {
       }
     });
 
+    // Load the trailer videos.
     webViewList = new ArrayList<>();
 
     viewModel.getMovieVideos(movieId);
@@ -128,6 +137,26 @@ public class MovieDetailFragment extends Fragment {
         default:
       }
     });
+
+    // Load the reviews. One page for now.
+    viewModel.getMovieReviews(new ReviewFilter(movieId, 1));
+
+    viewModel.getMovieReviewsLiveData().observe(this, movieFetchResource -> {
+      switch (movieFetchResource.getState()) {
+        case ERROR:
+          Toast.makeText(getContext(), R.string.generic_error, Toast.LENGTH_LONG).show();
+          break;
+        case LOADING:
+          break;
+        case SUCCESS:
+          reviewAdapter.updateReviewList(movieFetchResource.getData().getResults());
+          refreshReviewUI();
+          break;
+        case UNINITIALIZED:
+          break;
+        default:
+      }
+    });
   }
 
   @Override
@@ -141,6 +170,7 @@ public class MovieDetailFragment extends Fragment {
 
     refreshUI();
     refreshVideoUI();
+    refreshReviewUI();
 
     return view;
   }
@@ -202,6 +232,19 @@ public class MovieDetailFragment extends Fragment {
 
     for (VideoWebPlayer player : webViewList) {
       player.launch();
+    }
+  }
+
+  private void refreshReviewUI() {
+    if (reviewAdapter.getItemCount() > 0) {
+      reviewsLabel.setVisibility(View.VISIBLE);
+
+      reviewsList.setLayoutManager(new LinearLayoutManager(getContext()));
+      reviewsList.setAdapter(reviewAdapter);
+    } else {
+      ViewGroup.LayoutParams params = reviewsList.getLayoutParams();
+      params.height = 0;
+      reviewsList.setLayoutParams(params);
     }
   }
 
