@@ -7,6 +7,7 @@ import com.affinityclick.mvvm.BuildConfig;
 import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
+import com.affinityclick.mvvm.network.models.Review;
 import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.AppExecutors;
 import java.io.IOException;
@@ -232,6 +233,62 @@ public class TMDBRepository {
 
     // Failed to return success, so we return an error.
     FetchResource<Videos> errorValue = FetchResource.error(null);
+    if (fetchResource != null) {
+      fetchResource.postValue(errorValue);
+    }
+
+    return errorValue;
+  }
+
+  /**
+   * @param page Page of reviews for a movie to show.
+   * @return Value to be observed on to return the result
+   */
+  public LiveData<FetchResource<PageResult<Review>>> getReviews(int movieId, int page) {
+    FetchResource<PageResult<Review>> getReviews = new FetchResource<>();
+    MutableLiveData<FetchResource<PageResult<Review>>> reviewsListLiveResource = new MutableLiveData<>();
+
+    reviewsListLiveResource.postValue(getReviews);
+
+    appExecutors.networkIO().execute(() -> fetchReviewsList(reviewsListLiveResource, movieId, page));
+
+    return reviewsListLiveResource;
+  }
+
+  /**
+   * Network call to get the reviews for a movie.
+   *
+   * @param fetchResource LiveData to post the results to
+   * @param page Results page
+   * @return the value it emits through the LiveData (possibly useful for testing)
+   */
+  private FetchResource<PageResult<Review>> fetchReviewsList(@Nullable MutableLiveData<FetchResource<PageResult<Review>>> fetchResource,
+                                                             int movieId, int page) {
+    if (fetchResource != null) {
+      fetchResource.postValue(FetchResource.loading());
+    }
+
+    Call<PageResult<Review>> reviewsPageCall = tmdbApi.getReviews(movieId, page, BuildConfig.TMDB_API_KEY);
+
+    try {
+      Response<PageResult<Review>> getReviewsResponse = reviewsPageCall.execute();
+
+      if (getReviewsResponse.isSuccessful()) {
+        PageResult<Review> reviewsPageResult = getReviewsResponse.body();
+        FetchResource<PageResult<Review>> success = FetchResource.success(reviewsPageResult);
+
+        if (fetchResource != null) {
+          fetchResource.postValue(success);
+        }
+
+        return success;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    FetchResource<PageResult<Review>> errorValue = FetchResource.error(null);
+
     if (fetchResource != null) {
       fetchResource.postValue(errorValue);
     }

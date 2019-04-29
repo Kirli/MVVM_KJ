@@ -3,6 +3,7 @@ package com.affinityclick.mvvm.network;
 import com.affinityclick.mvvm.network.models.Credits;
 import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
+import com.affinityclick.mvvm.network.models.Review;
 import com.affinityclick.mvvm.network.models.Videos;
 
 import retrofit2.Call;
@@ -26,4 +27,7 @@ public interface TMDBApi {
 
   @GET("movie/{id}/videos")
   Call<Videos> getVideos(@Path("id") Integer id, @Query("api_key") String userkey);
+
+  @GET("movie/{id}/reviews")
+  Call<PageResult<Review>> getReviews(@Path("id") Integer id, @Query("page") int page, @Query("api_key") String userkey);
 }

@@ -9,6 +9,8 @@ import com.affinityclick.mvvm.network.TMDBApi;
 import com.affinityclick.mvvm.network.TMDBRepository;
 import com.affinityclick.mvvm.network.TMDBRepository_Factory;
 import com.affinityclick.mvvm.network.models.Credits;
+import com.affinityclick.mvvm.network.models.PageResult;
+import com.affinityclick.mvvm.network.models.Review;
 import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.AppExecutors;
 import com.affinityclick.mvvm.util.AppExecutors_Factory;
@@ -117,5 +119,55 @@ public class TMDBApiInstrumentedTest {
     assertEquals("5 Centimeters Per Second Trailer", result.getVideos().get(0).getName());
 
     assertEquals("Teaser", result.getVideos().get(0).getType());
+  }
+
+  @Test
+  public void getReviewsTest() {
+    int movieId = 297761;
+
+    AppExecutors appExecutors = AppExecutors_Factory.create().get();
+    TMDBApi api = AppModule_ProvideTMDBApiFactory.create(new AppModule()).get();
+    TMDBRepository repo = TMDBRepository_Factory.newTMDBRepository(appExecutors, api);
+
+    LiveData<FetchResource<PageResult<Review>>> reviews = repo.getReviews(movieId, 1);
+
+    FetchResource<PageResult<Review>> res = reviews.getValue();
+    assert res != null;
+    FetchResource.State state = res.getState();
+    assert state != null;
+
+    long startTime = SystemClock.currentThreadTimeMillis();
+    while (state != SUCCESS) {
+      try {
+        sleep(50);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        fail("INTERRUPT");
+      }
+
+      if (SystemClock.currentThreadTimeMillis() - startTime > 10000) {
+        fail("API call timed out.");
+      }
+
+      res = reviews.getValue();
+      assert res != null;
+      state = res.getState();
+      assert state != null;
+    }
+
+    PageResult<Review> result = res.getData();
+    assert result != null;
+
+    assertEquals((long)1, (long)result.getPage());
+
+    assert result.getResults() != null;
+
+    assert result.getResults().get(0) != null;
+
+    assert result.getResults().size() > 0;
+
+    assertEquals("Frank Ochieng", result.getResults().get(0).getAuthor());
+
+    assertEquals("https://www.themoviedb.org/review/57a814dc9251415cfb00309a", result.getResults().get(0).getURL());
   }
 }
