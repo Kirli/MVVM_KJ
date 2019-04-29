@@ -241,6 +241,10 @@ public class MovieDetailFragment extends Fragment {
 
       reviewsList.setLayoutManager(new LinearLayoutManager(getContext()));
       reviewsList.setAdapter(reviewAdapter);
+
+      ViewGroup.LayoutParams params = reviewsList.getLayoutParams();
+      params.height = 800;
+      reviewsList.setLayoutParams(params);
     } else {
       ViewGroup.LayoutParams params = reviewsList.getLayoutParams();
       params.height = 0;
