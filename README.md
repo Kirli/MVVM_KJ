@@ -15,3 +15,6 @@ Our dependency injection framework, their mostly unhelpful documentation resides
 
 ## Documentation
 See the wiki for more information: https://github.com/Kirli/MVVM_KJ/wiki .
+
+## Demo
+See the wiki for more information: https://github.com/Kirli/MVVM_KJ/wiki/Demo .
