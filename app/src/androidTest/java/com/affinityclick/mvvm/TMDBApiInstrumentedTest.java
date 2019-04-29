@@ -71,7 +71,9 @@ public class TMDBApiInstrumentedTest {
 
     assert result.getResults().size() > 0;
 
-    //assertEquals("Avengers: Infinity War", result.getResults().get(2).getTitle());
+    assertEquals("Captain Marvel", result.getResults().get(0).getTitle());
+    assertEquals("Avengers: Endgame", result.getResults().get(1).getTitle());
+    assertEquals("Avengers: Infinity War", result.getResults().get(2).getTitle());
   }
 
   @Test

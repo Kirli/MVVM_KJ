@@ -10,10 +10,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -22,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   @BindView(R.id.drawer_layout) DrawerLayout drawer;
 
   private NavController navController;
+  private AppBarConfiguration appBarConfiguration;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +37,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     setSupportActionBar(toolbar);
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
     navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-    NavigationUI.setupActionBarWithNavController(this, navController, drawer);
+
+    // Setup the app bar configuration.
+    // Define our custom top level destinations.
+    DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+    Set<Integer> topLevelDestinations = new HashSet<>();
+    topLevelDestinations.add(R.id.movieListFragment);
+    topLevelDestinations.add(R.id.popularMovieListFragment);
+    appBarConfiguration = new AppBarConfiguration.Builder(topLevelDestinations).setDrawerLayout(drawerLayout).build();
+
+    NavigationUI.setupActionBarWithNavController(this, this.navController, this.appBarConfiguration);
 
     navigationView.setNavigationItemSelectedListener(this);
-
   }
 
   @Override
   public boolean onSupportNavigateUp() {
-    return NavigationUI.navigateUp(navController, drawer);
+    // Use our custom app bar configuration.
+    return NavigationUI.navigateUp(navController, appBarConfiguration);
   }
 
   @Override
@@ -84,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     if (id == R.id.nav_top_rated) {
       navController.navigate(R.id.movieListFragment);
       // Handle the camera action
+    } else if (id == R.id.nav_most_popular) {
+      navController.navigate(R.id.popularMovieListFragment);
+
     } else if (id == R.id.nav_gallery) {
 
     }

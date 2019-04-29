@@ -1,10 +1,18 @@
-package com.affinityclick.mvvm.movie.list.topRated;
+package com.affinityclick.mvvm.movie.list.mostPopular;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.affinityclick.mvvm.R;
+import com.affinityclick.mvvm.movie.list.MovieAdapter;
+import com.affinityclick.mvvm.movie.list.topRated.MovieTopRatedListFragmentDirections;
+import com.affinityclick.mvvm.movie.list.topRated.MovieTopRatedListViewModel;
+
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,16 +24,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.affinityclick.mvvm.R;
-import com.affinityclick.mvvm.movie.list.MovieAdapter;
 import dagger.android.support.AndroidSupportInjection;
-import javax.inject.Inject;
 
-public class MovieTopRatedListFragment extends Fragment {
+public class MovieMostPopularListFragment extends Fragment {
   @Inject
   ViewModelProvider.Factory viewModelFactory;
 
-  private MovieTopRatedListViewModel viewModel;
+  private MovieMostPopularListViewModel viewModel;
 
   private MovieAdapter movieAdapter;
 
@@ -42,8 +47,8 @@ public class MovieTopRatedListFragment extends Fragment {
 
     movieAdapter = new MovieAdapter(
       movie -> {
-        MovieTopRatedListFragmentDirections.ViewMovieDetail
-        action = MovieTopRatedListFragmentDirections.viewMovieDetail(movie);
+        MovieMostPopularListFragmentDirections.ViewMovieDetail
+        action = MovieMostPopularListFragmentDirections.viewMovieDetail(movie);
 
         NavHostFragment.findNavController(this).navigate(action); }
     );
@@ -53,7 +58,7 @@ public class MovieTopRatedListFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    viewModel = ViewModelProviders.of(this, viewModelFactory).get(MovieTopRatedListViewModel.class);
+    viewModel = ViewModelProviders.of(this, viewModelFactory).get(MovieMostPopularListViewModel.class);
 
     viewModel.getMovieListLiveData().observe(this, movieFetchResource -> {
       switch (movieFetchResource.getState()) {

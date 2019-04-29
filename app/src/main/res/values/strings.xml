@@ -13,6 +13,7 @@
   <string name="view_credits">View Credits</string>
   <string name="movie_detail_fragment">Details</string>
   <string name="movie_list_top_rated">Top Rated Movies</string>
+  <string name="movie_list_most_popular">Most Popular Movies</string>
   <string name="credits">Credits</string>
   <string name="cast_photo">Cast Photo</string>
   <string name="crew_photo">Crew Photo</string>
