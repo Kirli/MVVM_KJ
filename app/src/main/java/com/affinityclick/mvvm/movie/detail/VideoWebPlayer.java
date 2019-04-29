@@ -32,8 +32,12 @@ public class VideoWebPlayer {
     view.addView(videoWebView);
   }
 
-  public void launch() {
-    String source = "<html><body><iframe width=\"1500\" height=\"900\" src=\"" + VideoUtil.youtubeVideoURLBuilder(key) + "\" frameborder=\"0\" allowfullscreen></iframe></body></html>";
+  public void launch(int width, int height) {
+    // Don't use raw string.
+    // TODO: Stop using a raw string.
+    // TODO: Add additional validation.
+    String source = "<html><body><iframe width=\"" + width + "\" height=\"" + height + "\" src=\"" +
+            VideoUtil.youtubeVideoURLBuilder(key) + "\" frameborder=\"0\" allowfullscreen></iframe></body></html>";
     videoWebView.loadData(source, "text/html", "utf-8");
   }
 }

@@ -1,6 +1,8 @@
 package com.affinityclick.mvvm.movie.detail;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -38,6 +40,7 @@ import com.affinityclick.mvvm.network.models.ReviewFilter;
 import com.affinityclick.mvvm.network.models.Video;
 import com.affinityclick.mvvm.network.models.Videos;
 import com.affinityclick.mvvm.util.MovieUtil;
+import com.affinityclick.mvvm.util.ScreenUtil;
 import com.affinityclick.mvvm.util.VideoUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -209,8 +212,6 @@ public class MovieDetailFragment extends Fragment {
           .load(MovieUtil.imagePathBuilder(movie.getBackdropPath()))
           .apply(RequestOptions.placeholderOf(R.color.colorLoading))
           .into(movieBackdrop);
-
-      //TODO: Reviews
     }
   }
 
@@ -231,7 +232,13 @@ public class MovieDetailFragment extends Fragment {
     }
 
     for (VideoWebPlayer player : webViewList) {
-      player.launch();
+      //TODO: Implement a better screen size algorithm.
+      Point screenDimension = ScreenUtil.getScreenDimensions((Activity) getContext());
+
+      int width = (int) (screenDimension.x * 1.15);
+      int height = (int) (width * 0.6);
+
+      player.launch(width, height);
     }
   }
 
