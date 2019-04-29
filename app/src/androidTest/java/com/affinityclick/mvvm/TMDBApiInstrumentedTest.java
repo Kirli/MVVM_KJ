@@ -9,6 +9,7 @@ import com.affinityclick.mvvm.network.TMDBApi;
 import com.affinityclick.mvvm.network.TMDBRepository;
 import com.affinityclick.mvvm.network.TMDBRepository_Factory;
 import com.affinityclick.mvvm.network.models.Credits;
+import com.affinityclick.mvvm.network.models.Movie;
 import com.affinityclick.mvvm.network.models.PageResult;
 import com.affinityclick.mvvm.network.models.Review;
 import com.affinityclick.mvvm.network.models.ReviewFilter;
@@ -27,6 +28,51 @@ import static org.junit.Assert.fail;
 
 public class TMDBApiInstrumentedTest {
   private final Object lock = new Object();
+
+  @Test
+  public void getPopularMoviesTest() {
+    int page = 1;
+
+    AppExecutors appExecutors = AppExecutors_Factory.create().get();
+    TMDBApi api = AppModule_ProvideTMDBApiFactory.create(new AppModule()).get();
+    TMDBRepository repo = TMDBRepository_Factory.newTMDBRepository(appExecutors, api);
+
+    LiveData<FetchResource<PageResult<Movie>>> movies = repo.getPopularMovies(page);
+
+    FetchResource<PageResult<Movie>> res = movies.getValue();
+    assert res != null;
+    FetchResource.State state = res.getState();
+    assert state != null;
+
+    long startTime = SystemClock.currentThreadTimeMillis();
+    while (state != SUCCESS) {
+      try {
+        sleep(50);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        fail("INTERRUPT");
+      }
+
+      if (SystemClock.currentThreadTimeMillis() - startTime > 10000) {
+        fail("API call timed out.");
+      }
+
+      res = movies.getValue();
+      assert res != null;
+      state = res.getState();
+      assert state != null;
+    }
+
+    PageResult<Movie> result = res.getData();
+
+    assert result != null;
+
+    assert result.getResults() != null;
+
+    assert result.getResults().size() > 0;
+
+    //assertEquals("Avengers: Infinity War", result.getResults().get(2).getTitle());
+  }
 
   @Test
   public void getCreditsTest() {

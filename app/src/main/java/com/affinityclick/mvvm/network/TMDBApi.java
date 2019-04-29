@@ -19,6 +19,9 @@ public interface TMDBApi {
   @GET("movie/top_rated")
   Call<PageResult<Movie>> getTopRatedMovies(@Query("page") int page, @Query("api_key") String userkey);
 
+  @GET("movie/popular")
+  Call<PageResult<Movie>> getPopularMovies(@Query("page") int page, @Query("api_key") String userkey);
+
   @GET("movie/{id}")
   Call<Movie> getMovie(@Path("id") Integer id, @Query("api_key") String userkey);
 
